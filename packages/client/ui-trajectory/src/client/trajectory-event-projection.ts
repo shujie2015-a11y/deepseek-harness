@@ -70,8 +70,8 @@ export function contextProducer(source: unknown): ContextProducerView {
       return { role: 'inject', label: readString(record, 'name') ?? kind }
     default:
       // MessageSourceMap is merge-extensible; keep an unknown producer
-      // visible by its durable kind.
-      return { role: 'inject', label: kind }
+      // visible by its durable kind unless the producer named its context.
+      return { role: 'inject', label: readString(record, 'label') ?? kind }
   }
 }
 

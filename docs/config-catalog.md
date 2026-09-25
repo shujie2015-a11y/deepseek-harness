@@ -1361,6 +1361,12 @@ export interface Config {
   defaultTimeoutMs?: number
   /** Character cap for the `hook/result` event's persisted stderr summary. */
   stderrSummaryMaxChars?: number
+  /**
+   * Display name for the injected-context rows this bridge produces. Clients that
+   * read the source's `label` show it in place of the producer kind; omitting the
+   * field leaves the source exactly as it is without this option.
+   */
+  contextLabel?: string
 }
 ```
 <!-- END GENERATED config-catalog:@deepseek-ai/dsh-hooks-codex -->

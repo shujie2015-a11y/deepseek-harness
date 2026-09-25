@@ -20,7 +20,7 @@ import { createUserMessage } from '@deepseek-ai/dsh-llm'
 import type { ContextFormed } from '@deepseek-ai/dsh-llm'
 declare module '@deepseek-ai/dsh-llm' {
   interface MessageSourceMap {
-    'hooks-codex': { kind: 'hooks-codex' } & ContextFormed
+    'hooks-codex': { kind: 'hooks-codex'; readonly label?: string } & ContextFormed
   }
 }
 
@@ -61,6 +61,12 @@ export interface Config {
   defaultTimeoutMs?: number
   /** Character cap for the `hook/result` event's persisted stderr summary. */
   stderrSummaryMaxChars?: number
+  /**
+   * Display name for the injected-context rows this bridge produces. Clients that
+   * read the source's `label` show it in place of the producer kind; omitting the
+   * field leaves the source exactly as it is without this option.
+   */
+  contextLabel?: string
 }
 
 export const Config: z<Config> = z.object({
@@ -68,6 +74,7 @@ export const Config: z<Config> = z.object({
   model: z.string().default(''),
   defaultTimeoutMs: z.number().default(DEFAULT_HOOK_TIMEOUT_MS),
   stderrSummaryMaxChars: z.number().default(DEFAULT_STDERR_SUMMARY_MAX_CHARS),
+  contextLabel: z.string().min(1),
 })
 
 let handlerCounter = 0
@@ -75,7 +82,10 @@ function nextHandlerId(point: string): string {
   return `codex:${point}:${++handlerCounter}`
 }
 
-const CONTEXT_SOURCE: MessageSource = { kind: 'hooks-codex' }
+// The bridge's own producer identity. Narrow on purpose: the optional display
+// label is added per mount, so spreading a union-typed `MessageSource` here
+// would make the labeled source fail to narrow back to this kind.
+const CONTEXT_SOURCE: { kind: 'hooks-codex' } = { kind: 'hooks-codex' }
 
 /** The summary cap bounds a persisted event field — a positive integer or the slice misbehaves silently. */
 function assertPositiveInteger(name: string, value: number): void {
@@ -103,6 +113,12 @@ export function apply(ctx: Context, config: Config): void {
   }
 
   const model = config.model ?? ''
+
+  // A configured label stays presentation metadata: the durable source keeps its
+  // producer kind and carries the label only when the deployment named one.
+  const contextSource: MessageSource = config.contextLabel === undefined
+    ? CONTEXT_SOURCE
+    : { ...CONTEXT_SOURCE, label: config.contextLabel }
 
   // SessionStart is the one emit-shaped (detached) point Codex has: track its
   // run chains so disposal aborts a still-running hook process and drains the
@@ -180,7 +196,7 @@ export function apply(ctx: Context, config: Config): void {
   function contextFrom(merged: MergedHookOutcome): UserMessage | undefined {
     if (merged.additionalContext.length === 0) return undefined
     const content: ContentBlock[] = merged.additionalContext.map(text => ({ type: 'text', text }))
-    return createUserMessage({ content, source: CONTEXT_SOURCE })
+    return createUserMessage({ content, source: contextSource })
   }
 
   /** Prepend one context without flattening source fields or other downstream metadata. */
@@ -271,7 +287,7 @@ export function apply(ctx: Context, config: Config): void {
       // empty stderr) still forces it — fall back to a generic steering line
       // rather than letting the turn stop.
       const text = merged.reason ?? 'continue: blocked by Stop hook'
-      agent.steer(createUserMessage({ content: [{ type: 'text', text }], source: CONTEXT_SOURCE }))
+      agent.steer(createUserMessage({ content: [{ type: 'text', text }], source: contextSource }))
     }
   })
 }

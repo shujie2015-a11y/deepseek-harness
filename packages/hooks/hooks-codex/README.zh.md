@@ -46,6 +46,7 @@ kind: "package-reference"
 | `model` | `''` | 写入每个 payload 的模型名称（Codex 在每个事件中都包含 `model`） |
 | `defaultTimeoutMs` | `600,000` | hook 未设置时的每 hook 超时（即 Codex 默认值） |
 | `stderrSummaryMaxChars` | `500` | 持久化 `hook/result` stderr 摘要的字符上限 |
+| `contextLabel` | 无 | 本桥接注入的上下文行的显示名；读取 source `label` 的客户端显示该名称而非生产者 kind |
 
 生成的[配置目录](../../../docs/config-catalog.zh.md#deepseek-aidsh-hooks-codex)是每个受支持字段的穷尽式真源。
 

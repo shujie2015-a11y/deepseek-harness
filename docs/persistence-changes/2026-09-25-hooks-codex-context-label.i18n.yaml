@@ -1,0 +1,28 @@
+# Bilingual-pair consistency record for 2026-09-25-hooks-codex-context-label.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write docs/persistence-changes/2026-09-25-hooks-codex-context-label.md
+/:
+  en: 3d5a424ae7d7e46b
+  zh: c22a8e4a62d8cc1a
+/2026-09-25-hooks-codex-context-label:
+  en: e38799d34aaf3a56
+  zh: e1fe6d8aa217ffd8
+/2026-09-25-hooks-codex-context-label/summary:
+  en: 6e5158222819a590
+  zh: f1a8af400f8cf1cb
+/2026-09-25-hooks-codex-context-label/table-of-contents:
+  en: 6cf314a069ceb451
+  zh: 9adff678e9ecab3b
+/2026-09-25-hooks-codex-context-label/declaration:
+  en: 6907136f28e48c90
+  zh: 02f8298485f3d8e7
+/2026-09-25-hooks-codex-context-label/compatibility:
+  en: f3f0f58ab51daa6f
+  zh: e89256c9190be475
+/2026-09-25-hooks-codex-context-label/verification:
+  en: 04822885ca48f501
+  zh: 5c7ae82756d3914f
+/2026-09-25-hooks-codex-context-label/dev-note:
+  en: b75c8458928b72b9
+  zh: 003ba4e17b4b5269

@@ -46,6 +46,7 @@ Use it when you own a Codex `hooks.json` and its command hooks should gate promp
 | `model` | `''` | Model name stamped on every payload (Codex includes `model` on each event) |
 | `defaultTimeoutMs` | `600,000` | Per-hook timeout when a hook sets none (the Codex default) |
 | `stderrSummaryMaxChars` | `500` | Character cap on the persisted `hook/result` stderr summary |
+| `contextLabel` | none | Display name for the injected-context rows this bridge produces; a client that reads the source's `label` shows it instead of the producer kind |
 
 The generated [configuration catalog](../../../docs/config-catalog.md#deepseek-aidsh-hooks-codex) is the exhaustive source for every accepted field.
 

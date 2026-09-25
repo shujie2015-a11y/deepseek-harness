@@ -38,7 +38,7 @@ function hooks(d: string, h: unknown): string {
   writeFileSync(join(d, 'hooks.json'), JSON.stringify({ hooks: h })); return join(d, 'hooks.json')
 }
 
-type HarnessOpts = { stderrSummaryMaxChars?: number; sessionRoot?: string }
+type HarnessOpts = { stderrSummaryMaxChars?: number; sessionRoot?: string; contextLabel?: string }
 async function harness(configPath: string, adapter: MockAdapter, opts: HarnessOpts = {}): Promise<Context> {
   const ctx = new Context()
   contexts.push(ctx)
@@ -153,6 +153,20 @@ export function defineCoverageCases(groups: CoverageGroup | readonly CoverageGro
       expect(contexts.map(event => event.type === 'user/message' && event.data.source)).toEqual([
         { kind: 'policy' },
         { kind: 'hooks-codex' },
+      ])
+    })
+
+    it('names the injected context rows when contextLabel is configured', async () => {
+      const d = dir()
+      hooks(d, { UserPromptSubmit: [{ hooks: [{ type: 'command', command: sh(d, 'named.sh', '#!/usr/bin/env bash\necho \'{"hookSpecificOutput":{"hookEventName":"UserPromptSubmit","additionalContext":"named-context"}}\'\n') }] }] })
+      const adapter = new MockAdapter([textResponse('ok')])
+      const ctx = await harness(join(d, 'hooks.json'), adapter, { contextLabel: '决策提醒' })
+      const agent = await ctx.agentLoop.create(SessionId('named-context'), { provider: 'mock', model: 'mock' })
+      agent.followup(createUserMessage({ content: [{ type: 'text', text: 'go' }], source: { kind: 'user' } })); await waitForIdle(ctx, agent)
+
+      const contexts = events(agent).filter(event => event.type === 'user/message' && event.data.source.kind !== 'user')
+      expect(contexts.map(event => event.type === 'user/message' && event.data.source)).toEqual([
+        { kind: 'hooks-codex', label: '决策提醒' },
       ])
     })
   })
